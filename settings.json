@@ -1,0 +1,99 @@
+{
+    /* VSCode - Breadcrumbs */
+    "breadcrumbs.symbolPath": "off",
+    "breadcrumbs.icons": false,
+
+    /* VSCode - Editor */
+    "editor.fontFamily": "Fira Code",
+    "editor.fontLigatures": "'calt', 'ss03', 'ss04', 'ss05'",
+    "editor.fontWeight": "450",
+    "editor.letterSpacing": 0.25,
+    "editor.linkedEditing": true,
+    "editor.minimap.enabled": false,
+
+    /* VSCode - Explorer */
+    "explorer.decorations.colors": false,
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "*.ts": "${capture}.js",
+        "*.js": "${capture}.js.map, ${capture}.min.js, ${capture}.d.ts",
+        "*.jsx": "${capture}.js",
+        "*.tsx": "${capture}.ts",
+        "tsconfig.json": "tsconfig.*.json",
+        "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml",
+        ".lint.md": ".editorconfig, .eslintrc.json, .stylelintrc.json"
+    },
+    "explorer.sortOrder": "type",
+
+    /* VSCode - Workbench */
+    "workbench.activityBar.location": "top",
+    "workbench.colorTheme": "One Dark Pro",
+    "workbench.editor.tabSizing": "shrink",
+    "workbench.iconTheme": "material-icon-theme",
+    "workbench.tree.indent": 19,
+    "workbench.tree.renderIndentGuides": "always",
+    "workbench.view.alwaysShowHeaderActions": true,
+    "workbench.colorCustomizations": {
+        "gitDecoration.addedResourceForeground": "#ABB2BF",
+        "gitDecoration.conflictingResourceForeground": "#ABB2BF",
+        "gitDecoration.deletedResourceForeground": "#ABB2BF",
+        "gitDecoration.ignoredResourceForeground": "#ABB2BF",
+        "gitDecoration.modifiedResourceForeground": "#ABB2BF",
+        "gitDecoration.renamedResourceForeground": "#ABB2BF",
+        "gitDecoration.stageDeletedResourceForeground": "#ABB2BF",
+        "gitDecoration.stageModifiedResourceForeground": "#ABB2BF",
+        "gitDecoration.submoduleResourceForeground": "#ABB2BF",
+        "gitDecoration.untrackedResourceForeground": "#ABB2BF",
+        "tab.activeForeground": "#ABB2BF",
+        "tab.hoverForeground": "#ABB2BF",
+        "tab.inactiveForeground": "#ABB2BF",
+        "list.activeSelectionForeground": "#ABB2BF",
+        "list.inactiveSelectionForeground": "#ABB2BF"
+    },
+
+    /* VSCode - Git */
+    "git.enableSmartCommit": true,
+    "git.confirmSync": false,
+
+    /* Language - All */
+    "[html][css][scss][json][jsonc]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+
+    /* Language - CSS */
+    "stylelint.validate": ["css", "scss"],
+    "[css][scss]": {
+        "editor.codeActionsOnSave": {
+            "source.fixAll.stylelint": "explicit"
+        }
+    },
+
+    /* Language - JavaScript */
+    "[javascript][typescript]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        }
+    },
+
+    /* Language - Markdown */
+    "[markdown]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.markdownlint": "explicit"
+        }
+    },
+
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true
+    },
+    "explorerExclude.backup": {}
+}
