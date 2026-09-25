@@ -1,11 +1,13 @@
 // @ts-check
 import { defineConfig } from 'eslint/config';
 import rootConfig from '../eslint.config.mjs';
+import angular from 'angular-eslint';
 
 export default defineConfig([
   ...rootConfig,
   {
     files: ['**/*.ts'],
+    extends: [angular.configs.tsRecommended],
     rules: {
       '@angular-eslint/directive-selector': [
         'error',
@@ -26,7 +28,15 @@ export default defineConfig([
     },
   },
   {
+    files: ['**/*.component.ts'],
+    processor: angular.processInlineTemplates,
+    rules: {},
+  },
+  {
     files: ['**/*.html'],
+    languageOptions: {
+      parser: angular.templateParser,
+    },
     rules: {},
   },
 ]);

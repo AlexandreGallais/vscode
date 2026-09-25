@@ -2,12 +2,16 @@
   /* Language - All */
   "[html][css][scss][json][jsonc]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.prettier": "explicit"
+    }
   },
 
   /* Language - CSS */
   "stylelint.validate": ["css", "scss"],
   "[css][scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
       "source.fixAll.stylelint": "explicit"
     }
@@ -18,7 +22,8 @@
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
+      "source.fixAll.eslint": "explicit",
+      "source.removeUnusedImports": "explicit"
     }
   },
 

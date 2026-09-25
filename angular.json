@@ -99,7 +99,7 @@
           "builder": "@angular-eslint/builder:lint",
           "options": {
             "lintFilePatterns": ["shell/**/*.ts", "shell/**/*.html"],
-            "eslintConfig": "shell/eslint.config.js"
+            "eslintConfig": "shell/eslint.config.mjs"
           }
         }
       }
