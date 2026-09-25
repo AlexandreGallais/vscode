@@ -1,0 +1,6 @@
+{
+  "build": { "dockerfile": "Dockerfile" },
+  "forwardPorts": [4200],
+  "postCreateCommand": "npm install -g @angular/cli@22 --verbose && npm ci --verbose",
+  "postAttachCommand": "bash .devcontainer/install-extensions.sh"
+}
