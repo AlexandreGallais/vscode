@@ -1,5 +1,4 @@
 {
-  /* Language - All */
   "[html][css][scss][json][jsonc]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -7,8 +6,6 @@
       "source.fixAll.prettier": "explicit"
     }
   },
-
-  /* Language - CSS */
   "stylelint.validate": ["css", "scss"],
   "[css][scss]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -16,8 +13,6 @@
       "source.fixAll.stylelint": "explicit"
     }
   },
-
-  /* Language - JavaScript */
   "[javascript][typescript]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "dbaeumer.vscode-eslint",
@@ -26,8 +21,6 @@
       "source.removeUnusedImports": "explicit"
     }
   },
-
-  /* Language - Markdown */
   "[markdown]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
