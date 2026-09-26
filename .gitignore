@@ -12,7 +12,12 @@ npm-debug.log
 yarn-error.log
 
 # IDEs and editors
-.idea/
+.idea/*
+!.idea/codeStyles/
+!.idea/prettier.xml
+!.idea/jsLinters/
+!.idea/stylesheetLinters/
+!.idea/inspectionProfiles/
 .project
 .classpath
 .c9/

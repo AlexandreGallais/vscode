@@ -1,6 +1,9 @@
 {
   "build": { "dockerfile": "Dockerfile" },
   "forwardPorts": [4200],
-  "postCreateCommand": "npm install -g @angular/cli@22 --verbose && npm ci --verbose",
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
+  ],
+  "postCreateCommand": "sudo chown node:node node_modules && npm install -g @angular/cli@22 --verbose && npm ci --verbose",
   "postAttachCommand": "bash .devcontainer/install-extensions.sh"
 }

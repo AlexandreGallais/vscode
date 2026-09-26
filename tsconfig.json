@@ -6,12 +6,15 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
+    "paths": {
+      "lib": ["./dist/lib"]
+    },
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "isolatedModules": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "ES2022",
+    "target": "ES2025",
     "module": "preserve",
     "lib": ["DOM", "ESNext"]
   },
@@ -20,13 +23,22 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true
   },
-  "files": ["test.ts"],
+  "files": [],
   "references": [
     {
       "path": "./shell/tsconfig.app.json"
     },
     {
       "path": "./shell/tsconfig.spec.json"
+    },
+    {
+      "path": "./tsconfig.test.json"
+    },
+    {
+      "path": "./lib/tsconfig.lib.json"
+    },
+    {
+      "path": "./lib/tsconfig.spec.json"
     }
   ]
 }

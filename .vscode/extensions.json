@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "alexiv.vscode-angular2-files",
     "angular.ng-template",
     "davidanson.vscode-markdownlint",
     "dbaeumer.vscode-eslint",
@@ -11,6 +10,7 @@
     "streetsidesoftware.code-spell-checker",
     "stylelint.vscode-stylelint",
     "unifiedjs.vscode-mdx",
+    "webben.browserslist",
     "yzhang.markdown-all-in-one"
   ]
 }
