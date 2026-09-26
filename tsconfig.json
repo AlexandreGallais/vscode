@@ -20,7 +20,7 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true
   },
-  "files": [],
+  "files": ["test.ts"],
   "references": [
     {
       "path": "./shell/tsconfig.app.json"
