@@ -712,7 +712,7 @@ export default defineConfig([
       '@eslint-community/eslint-comments/disable-enable-pair': ['error'],
       '@eslint-community/eslint-comments/no-aggregating-enable': ['error'],
       '@eslint-community/eslint-comments/no-duplicate-disable': ['error'],
-      // Off: no rule is locked yet; list here the rules that must never be disabled.
+      // Off: no rule is locked yet; list here the rules that must never be disabled. TODO
       '@eslint-community/eslint-comments/no-restricted-disable': ['off'],
       '@eslint-community/eslint-comments/no-unlimited-disable': ['error'],
       // Deprecated: replaced by linterOptions.reportUnusedDisableDirectives.
