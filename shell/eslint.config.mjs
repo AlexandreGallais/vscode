@@ -1,8 +1,8 @@
 // @ts-check
 // Comment prefixes: `Custom` = project choice (non-standard), `Off` = disabled on purpose (same as the root config).
 import { defineConfig } from 'eslint/config';
-import rootConfig from '../eslint.config.mjs';
 import angular from 'angular-eslint';
+import rootConfig from '../eslint.config.mjs';
 
 export default defineConfig([
   ...rootConfig,
@@ -14,8 +14,7 @@ export default defineConfig([
     },
     rules: {
       '@angular-eslint/component-class-suffix': ['error'],
-      // Custom: no inline template, styles or animations; every component has its own .html and .scss files.
-      '@angular-eslint/component-max-inline-declarations': ['error', { template: 0, styles: 0, animations: 0 }],
+      '@angular-eslint/component-max-inline-declarations': ['error'],
       '@angular-eslint/component-selector': [
         'error',
         {

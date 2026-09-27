@@ -19,12 +19,27 @@
     "lib": ["DOM", "ESNext"],
 
     "strict": true,
-    "noImplicitThis": true
+    "noImplicitThis": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedSideEffectImports": true
+    /* noUnusedLocals, noUnusedParameters and allowUnreachableCode are left to ESLint: dead code fails the lint, not the build. */
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true
+    "strictInputAccessModifiers": true,
+    /* strictTemplates and typeCheckHostBindings default to true in Angular 22. */
+    /* Template diagnostics fail the build, except unused or useless code (left as warnings, like noUnusedLocals). */
+    "extendedDiagnostics": {
+      "defaultCategory": "error",
+      "checks": {
+        "nullishCoalescingNotNullable": "warning",
+        "optionalChainNotNullable": "warning",
+        "unusedLetDeclaration": "warning",
+        "unusedStandaloneImports": "warning"
+      }
+    }
   },
   "files": [],
   "references": [

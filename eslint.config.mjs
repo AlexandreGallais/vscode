@@ -4,9 +4,22 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import tsEslint from 'typescript-eslint';
 import prettier from 'eslint-plugin-prettier/recommended';
 import sonarjs from 'eslint-plugin-sonarjs';
+import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
+import importX from 'eslint-plugin-import-x';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import checkFile from 'eslint-plugin-check-file';
+import ngrx from '@ngrx/eslint-plugin';
+import vitest from '@vitest/eslint-plugin';
 import globals from 'globals';
 
 export default defineConfig([
+  // Stale `eslint-disable` and inline configs are errors, so every exception stays justified.
+  {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
+      reportUnusedInlineConfigs: 'error',
+    },
+  },
   // Build outputs, caches and dependencies (same folders as .gitignore).
   globalIgnores([
     '**/node_modules/',
@@ -399,6 +412,8 @@ export default defineConfig([
       'no-const-assign': ['off'],
       'no-dupe-args': ['off'],
       'no-dupe-keys': ['off'],
+      // Off: TypeScript `noFallthroughCasesInSwitch` covers it.
+      'no-fallthrough': ['off'],
       'no-func-assign': ['off'],
       'no-import-assign': ['off'],
       'no-new-native-nonconstructor': ['off'],
@@ -680,6 +695,255 @@ export default defineConfig([
       '@typescript-eslint/use-unknown-in-catch-callback-variable': ['error'],
     },
   },
+  // ESLint directive comments: a rule is disabled one line at a time, with a reason.
+  {
+    files: ['**/*.js', '**/*.mjs', '**/*.ts', '**/*.mts'],
+    plugins: {
+      '@eslint-community/eslint-comments': eslintComments,
+    },
+    rules: {
+      '@eslint-community/eslint-comments/disable-enable-pair': ['error'],
+      '@eslint-community/eslint-comments/no-aggregating-enable': ['error'],
+      '@eslint-community/eslint-comments/no-duplicate-disable': ['error'],
+      // Off: no rule is locked yet; list here the rules that must never be disabled.
+      '@eslint-community/eslint-comments/no-restricted-disable': ['off'],
+      '@eslint-community/eslint-comments/no-unlimited-disable': ['error'],
+      // Deprecated: replaced by linterOptions.reportUnusedDisableDirectives.
+      '@eslint-community/eslint-comments/no-unused-disable': ['off'],
+      '@eslint-community/eslint-comments/no-unused-enable': ['error'],
+      // Custom: only `eslint-disable-next-line`; no file-wide disable, no inline config, no `/* global */`.
+      '@eslint-community/eslint-comments/no-use': ['error', { allow: ['eslint-disable-next-line'] }],
+      // `// eslint-disable-next-line rule -- reason`.
+      '@eslint-community/eslint-comments/require-description': ['error'],
+    },
+  },
+  // Imports: module boundaries, dependencies and cycles.
+  {
+    files: ['**/*.js', '**/*.mjs', '**/*.ts', '**/*.mts'],
+    plugins: {
+      'import-x': importX,
+    },
+    settings: {
+      'import-x/extensions': ['.ts', '.mts', '.js', '.mjs'],
+      'import-x/parsers': { '@typescript-eslint/parser': ['.ts', '.mts'] },
+      'import-x/resolver-next': [
+        // The root tsconfig references every project.
+        createTypeScriptImportResolver({ project: `${import.meta.dirname}/tsconfig.json` }),
+      ],
+    },
+    rules: {
+      // `import type { A }` on its own line, like consistent-type-imports.
+      'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+      // Off: TypeScript checks it.
+      'import-x/default': ['off'],
+      // Off: webpack only (Angular builds with esbuild).
+      'import-x/dynamic-import-chunkname': ['off'],
+      'import-x/export': ['error'],
+      // Off: non-standard.
+      'import-x/exports-last': ['off'],
+      // Off: TypeScript imports have no extension, Node ESM configs need one.
+      'import-x/extensions': ['off'],
+      'import-x/first': ['error'],
+      // Off: non-standard.
+      'import-x/group-exports': ['off'],
+      // Deprecated: replaced by import-x/first.
+      'import-x/imports-first': ['off'],
+      // Off: no SonarQube equivalent.
+      'import-x/max-dependencies': ['off'],
+      // Off: TypeScript checks it.
+      'import-x/named': ['off'],
+      // Off: TypeScript checks it.
+      'import-x/namespace': ['off'],
+      'import-x/newline-after-import': ['error'],
+      'import-x/no-absolute-path': ['error'],
+      'import-x/no-amd': ['error'],
+      'import-x/no-anonymous-default-export': ['error'],
+      'import-x/no-commonjs': ['error'],
+      'import-x/no-cycle': ['error'],
+      // Named exports only (Angular convention); tool configs are the exception.
+      'import-x/no-default-export': ['error'],
+      // Off: duplicate of @typescript-eslint/no-deprecated.
+      'import-x/no-deprecated': ['off'],
+      'import-x/no-duplicates': ['error'],
+      'import-x/no-dynamic-require': ['error'],
+      'import-x/no-empty-named-blocks': ['error'],
+      // Custom: devDependencies only in specs and tool configs; each file checks its nearest package.json.
+      'import-x/no-extraneous-dependencies': [
+        'error',
+        {
+          devDependencies: ['**/*.spec.ts', '**/*.mjs', '**/*.mts'],
+          optionalDependencies: false,
+          peerDependencies: true,
+          bundledDependencies: false,
+        },
+      ],
+      'import-x/no-import-module-exports': ['error'],
+      // Off: would flag every nested relative path (`./components/button/button.component`).
+      'import-x/no-internal-modules': ['off'],
+      'import-x/no-mutable-exports': ['error'],
+      // Off: default exports are forbidden (no-default-export).
+      'import-x/no-named-as-default': ['off'],
+      // Off: TypeScript checks it.
+      'import-x/no-named-as-default-member': ['off'],
+      'import-x/no-named-default': ['error'],
+      // Off: contradicts no-default-export.
+      'import-x/no-named-export': ['off'],
+      'import-x/no-namespace': ['error'],
+      // Browser code; tool configs are the exception.
+      'import-x/no-nodejs-modules': ['error'],
+      'import-x/no-relative-packages': ['error'],
+      // Off: features import shared code from parent folders.
+      'import-x/no-relative-parent-imports': ['off'],
+      // Off: default exports are forbidden (no-default-export).
+      'import-x/no-rename-default': ['off'],
+      // Custom: the library never depends on the app; the app uses the library through its package name.
+      'import-x/no-restricted-paths': [
+        'error',
+        {
+          basePath: import.meta.dirname,
+          zones: [
+            { target: './lib', from: './shell', message: 'The library cannot depend on the application.' },
+            { target: './shell', from: './lib', message: "Import the library through its package name ('lib')." },
+          ],
+        },
+      ],
+      'import-x/no-self-import': ['error'],
+      'import-x/no-unassigned-import': ['error'],
+      // Off: TypeScript checks it.
+      'import-x/no-unresolved': ['off'],
+      // Off: a library's exports are used outside this repo.
+      'import-x/no-unused-modules': ['off'],
+      'import-x/no-useless-path-segments': ['error'],
+      'import-x/no-webpack-loader-syntax': ['error'],
+      // Custom: packages first, relative files last (`import type` included), never sorted alphabetically.
+      'import-x/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object'],
+          'newlines-between': 'never',
+        },
+      ],
+      // Off: contradicts no-default-export.
+      'import-x/prefer-default-export': ['off'],
+      // Off: needs a per-library list.
+      'import-x/prefer-namespace-import': ['off'],
+      'import-x/unambiguous': ['error'],
+    },
+  },
+  // Tool configs (ESLint, Vitest…) run in Node, export a default config and use the root devDependencies.
+  {
+    files: ['**/*.js', '**/*.mjs', '**/*.mts'],
+    rules: {
+      'import-x/no-anonymous-default-export': ['off'],
+      'import-x/no-default-export': ['off'],
+      'import-x/no-extraneous-dependencies': ['error', { packageDir: import.meta.dirname }],
+      'import-x/no-nodejs-modules': ['off'],
+      // Off: project configs extend the root config (`../eslint.config.mjs`).
+      'import-x/no-relative-packages': ['off'],
+    },
+  },
+  // File and folder names: kebab-case, the Angular type stays a middle extension (`button.component.ts`).
+  {
+    files: ['**/*.js', '**/*.mjs', '**/*.ts', '**/*.mts', '**/*.html'],
+    plugins: {
+      'check-file': checkFile,
+    },
+    rules: {
+      // Off: nothing to block beyond kebab-case.
+      'check-file/filename-blocklist': ['off'],
+      'check-file/filename-naming-convention': [
+        'error',
+        { '**/*.{js,mjs,ts,mts,html}': 'KEBAB_CASE' },
+        { ignoreMiddleExtensions: true },
+      ],
+      // Off: files are grouped by feature, not by type.
+      'check-file/folder-match-with-fex': ['off'],
+      'check-file/folder-naming-convention': ['error', { '**/': 'KEBAB_CASE' }],
+      // No `index.ts` barrels: public-api.ts is the only entry point.
+      'check-file/no-index': ['error'],
+    },
+  },
+  // Angular requires this name for the application page.
+  {
+    files: ['**/src/index.html'],
+    rules: {
+      'check-file/no-index': ['off'],
+    },
+  },
+  // NgRx: only @ngrx/signals is installed.
+  {
+    files: ['**/*.ts'],
+    plugins: {
+      '@ngrx': ngrx,
+    },
+    rules: {
+      // Off: @ngrx/component-store is not installed.
+      '@ngrx/avoid-combining-component-store-selectors': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/avoid-combining-selectors': ['off'],
+      // Off: @ngrx/effects is not installed.
+      '@ngrx/avoid-cyclic-effects': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/avoid-dispatching-multiple-actions-sequentially': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/avoid-duplicate-actions-in-reducer': ['off'],
+      // Off: @ngrx/component-store is not installed.
+      '@ngrx/avoid-mapping-component-store-selectors': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/avoid-mapping-selectors': ['off'],
+      '@ngrx/enforce-type-call': ['error'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/good-action-hygiene': ['off'],
+      // Off: @ngrx/effects is not installed.
+      '@ngrx/no-dispatch-in-effects': ['off'],
+      // Off: @ngrx/effects is not installed.
+      '@ngrx/no-effects-in-providers': ['off'],
+      // Off: @ngrx/effects is not installed.
+      '@ngrx/no-multiple-actions-in-effects': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/no-multiple-global-stores': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/no-reducer-in-key-names': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/no-store-subscription': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/no-typed-global-store': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/on-function-explicit-return-type': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/prefer-action-creator': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/prefer-action-creator-in-dispatch': ['off'],
+      // Off: @ngrx/effects is not installed.
+      '@ngrx/prefer-action-creator-in-of-type': ['off'],
+      // Off: @ngrx/operators is not installed.
+      '@ngrx/prefer-concat-latest-from': ['off'],
+      // Off: @ngrx/effects is not installed.
+      '@ngrx/prefer-effect-callback-in-block-statement': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/prefer-inline-action-props': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/prefer-one-generic-in-create-for-feature-selector': ['off'],
+      '@ngrx/prefer-protected-state': ['error'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/prefer-selector-in-select': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/prefix-selectors-with-select': ['off'],
+      // Off: @ngrx/component-store is not installed.
+      '@ngrx/require-super-ondestroy': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/select-style': ['off'],
+      '@ngrx/signal-state-no-arrays-at-root-level': ['error'],
+      '@ngrx/signal-store-feature-should-use-generic-type': ['error'],
+      // Off: @ngrx/component-store is not installed.
+      '@ngrx/updater-explicit-return-type': ['off'],
+      // Off: @ngrx/store is not installed.
+      '@ngrx/use-consistent-global-store-name': ['off'],
+      // Off: @ngrx/effects is not installed.
+      '@ngrx/use-effects-lifecycle-interface': ['off'],
+      '@ngrx/with-state-no-arrays-at-root-level': ['error'],
+    },
+  },
   // NgRx features: the type returned by `signalStoreFeature()` is too complex to write by hand.
   {
     files: ['**/*store*/**/with*.ts'],
@@ -695,14 +959,128 @@ export default defineConfig([
         ...globals.vitest,
       },
     },
+    plugins: {
+      vitest,
+    },
     rules: {
       // Off: Angular types `fixture.nativeElement` as `any`.
       '@typescript-eslint/no-unsafe-assignment': ['off'],
       '@typescript-eslint/no-unsafe-call': ['off'],
       '@typescript-eslint/no-unsafe-member-access': ['off'],
       '@typescript-eslint/no-unsafe-type-assertion': ['off'],
+      // Replaced by the Vitest version (allows `expect(obj.method).toHaveBeenCalled()`).
+      '@typescript-eslint/unbound-method': ['off'],
       // Off: a `describe` callback holds a whole suite.
       'sonarjs/max-lines-per-function': ['off'],
+
+      // ---- Vitest ----
+      // Custom: `.for` (typed, Vitest 2+) instead of `.each`.
+      'vitest/consistent-each-for': ['error', { test: 'for', it: 'for', describe: 'for', suite: 'for' }],
+      // Custom: Angular specs are named `*.spec.ts`.
+      'vitest/consistent-test-filename': ['error', { pattern: String.raw`.*\.spec\.ts$` }],
+      // Custom: `it` everywhere, as generated by the Angular CLI.
+      'vitest/consistent-test-it': ['error', { fn: 'it', withinDescribe: 'it' }],
+      'vitest/consistent-vitest-vi': ['error'],
+      'vitest/expect-expect': ['error'],
+      'vitest/hoisted-apis-on-top': ['error'],
+      'vitest/max-expects': ['error'],
+      'vitest/max-nested-describe': ['error'],
+      'vitest/no-alias-methods': ['error'],
+      'vitest/no-commented-out-tests': ['error'],
+      'vitest/no-conditional-expect': ['error'],
+      'vitest/no-conditional-in-test': ['error'],
+      'vitest/no-conditional-tests': ['error'],
+      'vitest/no-disabled-tests': ['error'],
+      // Deprecated: no replacement.
+      'vitest/no-done-callback': ['off'],
+      'vitest/no-duplicate-hooks': ['error'],
+      'vitest/no-focused-tests': ['error'],
+      // Off: Angular specs configure TestBed in `beforeEach`.
+      'vitest/no-hooks': ['off'],
+      'vitest/no-identical-title': ['error'],
+      'vitest/no-import-node-test': ['error'],
+      // Vitest globals are enabled (see languageOptions above).
+      'vitest/no-importing-vitest-globals': ['error'],
+      'vitest/no-interpolation-in-snapshots': ['error'],
+      'vitest/no-large-snapshots': ['error'],
+      'vitest/no-mocks-import': ['error'],
+      // Off: needs a list of forbidden matchers.
+      'vitest/no-restricted-matchers': ['off'],
+      // Off: needs a list of forbidden `vi` methods.
+      'vitest/no-restricted-vi-methods': ['off'],
+      'vitest/no-standalone-expect': ['error'],
+      'vitest/no-test-prefixes': ['error'],
+      'vitest/no-test-return-statement': ['error'],
+      'vitest/no-unneeded-async-expect-function': ['error'],
+      // Off: blank lines are left to the author, like the rest of the layout.
+      'vitest/padding-around-after-all-blocks': ['off'],
+      // Off: blank lines are left to the author, like the rest of the layout.
+      'vitest/padding-around-after-each-blocks': ['off'],
+      // Off: blank lines are left to the author, like the rest of the layout.
+      'vitest/padding-around-all': ['off'],
+      // Off: blank lines are left to the author, like the rest of the layout.
+      'vitest/padding-around-before-all-blocks': ['off'],
+      // Off: blank lines are left to the author, like the rest of the layout.
+      'vitest/padding-around-before-each-blocks': ['off'],
+      // Off: blank lines are left to the author, like the rest of the layout.
+      'vitest/padding-around-describe-blocks': ['off'],
+      // Off: blank lines are left to the author, like the rest of the layout.
+      'vitest/padding-around-expect-groups': ['off'],
+      // Off: blank lines are left to the author, like the rest of the layout.
+      'vitest/padding-around-test-blocks': ['off'],
+      'vitest/prefer-called-exactly-once-with': ['error'],
+      'vitest/prefer-called-once': ['error'],
+      // Off: opposite of prefer-called-once.
+      'vitest/prefer-called-times': ['off'],
+      'vitest/prefer-called-with': ['error'],
+      'vitest/prefer-comparison-matcher': ['error'],
+      'vitest/prefer-describe-function-title': ['error'],
+      'vitest/prefer-each': ['error'],
+      'vitest/prefer-equality-matcher': ['error'],
+      // Off: requires `expect.assertions()` in every test; async tests use `await` instead.
+      'vitest/prefer-expect-assertions': ['off'],
+      'vitest/prefer-expect-resolves': ['error'],
+      'vitest/prefer-expect-type-of': ['error'],
+      'vitest/prefer-hooks-in-order': ['error'],
+      'vitest/prefer-hooks-on-top': ['error'],
+      'vitest/prefer-import-in-mock': ['error'],
+      // Off: opposite of no-importing-vitest-globals.
+      'vitest/prefer-importing-vitest-globals': ['off'],
+      // Custom: `describe` titles are classes (`ButtonComponent`).
+      'vitest/prefer-lowercase-title': ['error', { ignore: ['describe'] }],
+      'vitest/prefer-mock-promise-shorthand': ['error'],
+      'vitest/prefer-mock-return-shorthand': ['error'],
+      'vitest/prefer-snapshot-hint': ['error'],
+      'vitest/prefer-spy-on': ['error'],
+      // No coercion: `toBe(true)`, or `toBeDefined()` for an object.
+      'vitest/prefer-strict-boolean-matchers': ['error'],
+      'vitest/prefer-strict-equal': ['error'],
+      'vitest/prefer-to-be': ['error'],
+      // Off: opposite of prefer-strict-boolean-matchers.
+      'vitest/prefer-to-be-falsy': ['off'],
+      'vitest/prefer-to-be-object': ['error'],
+      // Off: opposite of prefer-strict-boolean-matchers.
+      'vitest/prefer-to-be-truthy': ['off'],
+      'vitest/prefer-to-contain': ['error'],
+      'vitest/prefer-to-have-been-called-times': ['error'],
+      'vitest/prefer-to-have-length': ['error'],
+      'vitest/prefer-todo': ['error'],
+      'vitest/prefer-vi-mocked': ['error'],
+      'vitest/require-awaited-expect-poll': ['error'],
+      'vitest/require-hook': ['error'],
+      'vitest/require-local-test-context-for-concurrent-snapshots': ['error'],
+      'vitest/require-mock-type-parameters': ['error'],
+      // Off: the Vitest config sets the timeout.
+      'vitest/require-test-timeout': ['off'],
+      'vitest/require-to-throw-message': ['error'],
+      'vitest/require-top-level-describe': ['error'],
+      'vitest/unbound-method': ['error'],
+      'vitest/valid-describe-callback': ['error'],
+      'vitest/valid-expect': ['error'],
+      'vitest/valid-expect-in-promise': ['error'],
+      'vitest/valid-title': ['error'],
+      // `.todo` tests are listed, and block the CI with `--max-warnings 0`.
+      'vitest/warn-todo': ['warn'],
     },
   },
   // ESLint configs list every rule explicitly.

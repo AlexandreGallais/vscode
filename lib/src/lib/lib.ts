@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 
 @Component({
-  imports: [],
   selector: 'dsc-lib',
-  styles: ``,
+  imports: [],
   template: ` <p>lib works!</p> `,
+  styles: ``,
 })
 export class LibComponent {}

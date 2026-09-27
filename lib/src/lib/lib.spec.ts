@@ -2,7 +2,7 @@ import type { ComponentFixture } from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
 import { LibComponent } from './lib';
 
-describe('LibComponent', () => {
+describe(LibComponent, () => {
   let component: LibComponent;
   let fixture: ComponentFixture<LibComponent>;
 
@@ -17,6 +17,6 @@ describe('LibComponent', () => {
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(component).toBe(true);
   });
 });
