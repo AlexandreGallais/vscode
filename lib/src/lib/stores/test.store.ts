@@ -17,11 +17,3 @@ export const BooksStore = signalStore(
     },
   })),
 );
-
-
-
-
-
-
-
-

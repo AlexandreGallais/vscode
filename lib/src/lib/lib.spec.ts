@@ -17,6 +17,6 @@ describe(LibComponent, () => {
   });
 
   it('should create', () => {
-    expect(component).toBe(true);
+    expect(component).toBeTruthy();
   });
 });

@@ -51,6 +51,10 @@ export default defineConfig([
       'sonarjs/nested-control-flow': ['error'],
       // Off: duplicate of array-callback-return.
       'sonarjs/array-callback-without-return': ['off'],
+      // Off: duplicate of vitest/no-standalone-expect.
+      'sonarjs/assertions-in-test-cases': ['off'],
+      // Off: duplicate of vitest/expect-expect.
+      'sonarjs/assertions-in-tests': ['off'],
       // Off: duplicate of block-scoped-var.
       'sonarjs/block-scoped-var': ['off'],
       // Off: duplicate of @typescript-eslint/naming-convention.
@@ -67,6 +71,8 @@ export default defineConfig([
       'sonarjs/function-inside-loop': ['off'],
       // Off: duplicate of require-yield.
       'sonarjs/generator-without-yield': ['off'],
+      // Off: duplicate of vitest/prefer-hooks-on-top.
+      'sonarjs/hooks-before-test-cases': ['off'],
       // Off: duplicate of no-labels.
       'sonarjs/label-position': ['off'],
       // Off: duplicate of @typescript-eslint/require-array-sort-compare.
@@ -83,8 +89,14 @@ export default defineConfig([
       'sonarjs/no-delete-var': ['off'],
       // Off: duplicate of @typescript-eslint/no-duplicate-type-constituents.
       'sonarjs/no-duplicate-in-composite': ['off'],
+      // Off: duplicate of vitest/no-identical-title.
+      'sonarjs/no-duplicate-test-title': ['off'],
       // Off: duplicate of no-empty-character-class.
       'sonarjs/no-empty-character-class': ['off'],
+      // Off: duplicate of vitest/valid-title.
+      'sonarjs/no-empty-test-title': ['off'],
+      // Off: duplicate of vitest/no-focused-tests.
+      'sonarjs/no-exclusive-tests': ['off'],
       // Off: already a TypeScript compiler error.
       'sonarjs/no-extra-arguments': ['off'],
       // Off: duplicate of no-fallthrough.
@@ -113,6 +125,8 @@ export default defineConfig([
       'sonarjs/no-redundant-boolean': ['off'],
       // Off: duplicate of no-regex-spaces.
       'sonarjs/no-regex-spaces': ['off'],
+      // Off: duplicate of vitest/no-disabled-tests.
+      'sonarjs/no-skipped-tests': ['off'],
       // Off: duplicate of curly.
       'sonarjs/no-unenclosed-multiline-block': ['off'],
       // Off: duplicate of no-new (which reports any `new` used for side effects).
@@ -827,7 +841,8 @@ export default defineConfig([
       'import-x/prefer-default-export': ['off'],
       // Off: needs a per-library list.
       'import-x/prefer-namespace-import': ['off'],
-      'import-x/unambiguous': ['error'],
+      // Off: every file is parsed as a module; it would flag a spec whose only import (vitest) was removed.
+      'import-x/unambiguous': ['off'],
     },
   },
   // Tool configs (ESLint, Vitest…) run in Node, export a default config and use the root devDependencies.
@@ -962,6 +977,10 @@ export default defineConfig([
     plugins: {
       vitest,
     },
+    // Type information lets valid-title accept a class as title (`describe(AppComponent, …)`).
+    settings: {
+      vitest: { typecheck: true },
+    },
     rules: {
       // Off: Angular types `fixture.nativeElement` as `any`.
       '@typescript-eslint/no-unsafe-assignment': ['off'],
@@ -1028,11 +1047,13 @@ export default defineConfig([
       'vitest/padding-around-expect-groups': ['off'],
       // Off: blank lines are left to the author, like the rest of the layout.
       'vitest/padding-around-test-blocks': ['off'],
-      'vitest/prefer-called-exactly-once-with': ['error'],
+      // Off: its autofix turns `toHaveBeenCalledOnce()` into `toHaveBeenCalledExactlyOnceWith()`, which asserts no arguments.
+      'vitest/prefer-called-exactly-once-with': ['off'],
       'vitest/prefer-called-once': ['error'],
       // Off: opposite of prefer-called-once.
       'vitest/prefer-called-times': ['off'],
-      'vitest/prefer-called-with': ['error'],
+      // Off: its autofix turns `toHaveBeenCalled()` into `toHaveBeenCalledWith()`, which asserts no arguments.
+      'vitest/prefer-called-with': ['off'],
       'vitest/prefer-comparison-matcher': ['error'],
       'vitest/prefer-describe-function-title': ['error'],
       'vitest/prefer-each': ['error'],
@@ -1052,14 +1073,14 @@ export default defineConfig([
       'vitest/prefer-mock-return-shorthand': ['error'],
       'vitest/prefer-snapshot-hint': ['error'],
       'vitest/prefer-spy-on': ['error'],
-      // No coercion: `toBe(true)`, or `toBeDefined()` for an object.
-      'vitest/prefer-strict-boolean-matchers': ['error'],
+      // Off: its autofix turns `toBeTruthy()` into `toBe(true)`, which fails on objects.
+      'vitest/prefer-strict-boolean-matchers': ['off'],
       'vitest/prefer-strict-equal': ['error'],
       'vitest/prefer-to-be': ['error'],
-      // Off: opposite of prefer-strict-boolean-matchers.
+      // Off: loosens `toBe(false)` into `toBeFalsy()`.
       'vitest/prefer-to-be-falsy': ['off'],
       'vitest/prefer-to-be-object': ['error'],
-      // Off: opposite of prefer-strict-boolean-matchers.
+      // Off: loosens `toBe(true)` into `toBeTruthy()`.
       'vitest/prefer-to-be-truthy': ['off'],
       'vitest/prefer-to-contain': ['error'],
       'vitest/prefer-to-have-been-called-times': ['error'],
