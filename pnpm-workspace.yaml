@@ -1,7 +1,7 @@
 # Native binaries (esbuild, rollup, lmdb, unrs-resolver…) for every platform in one node_modules:
-# the same folder works on macOS, in the devcontainer and on Linux machines, and can be deleted freely.
+# the same folder works on macOS, Windows, Linux and in the devcontainer, and can be deleted freely.
 supportedArchitectures:
-  os: [darwin, linux]
+  os: [darwin, linux, win32]
   cpu: [arm64, x64]
   libc: [glibc]
 
