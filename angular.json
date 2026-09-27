@@ -37,7 +37,7 @@
       },
       "root": "shell",
       "sourceRoot": "shell/src",
-      "prefix": "app",
+      "prefix": "shell",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
