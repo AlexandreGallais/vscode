@@ -1,11 +1,9 @@
 import { Component } from '@angular/core';
 
 @Component({
-  imports: [],
   selector: 'dsc-button',
-  styleUrl: './button.component.scss',
+  imports: [],
   templateUrl: './button.component.html',
+  styleUrl: './button.component.scss',
 })
 export class ButtonComponent {}
-
-

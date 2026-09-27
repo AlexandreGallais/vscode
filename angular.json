@@ -162,6 +162,22 @@
             "lintFilePatterns": ["lib/**/*.ts", "lib/**/*.html"],
             "eslintConfig": "lib/eslint.config.mjs"
           }
+        },
+        "storybook": {
+          "builder": "@storybook/angular-vite:start-storybook",
+          "options": {
+            "configDir": "lib/.storybook",
+            "browserTarget": "lib:build",
+            "port": 6006
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular-vite:build-storybook",
+          "options": {
+            "configDir": "lib/.storybook",
+            "browserTarget": "lib:build",
+            "outputDir": "dist/storybook/lib"
+          }
         }
       }
     }

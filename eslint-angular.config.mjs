@@ -6,6 +6,12 @@ import angular from 'angular-eslint';
 import ngrx from '@ngrx/eslint-plugin';
 import rootConfig, { namingConventionSelectors } from './eslint.config.mjs';
 
+// These plugins are typed with typescript-eslint types, which ESLint's own types reject; they work at runtime.
+/** @typedef {import('eslint').ESLint.Plugin} Plugin */
+const angularPlugin = /** @type {Plugin} */ (/** @type {unknown} */ (angular.tsPlugin));
+const angularTemplatePlugin = /** @type {Plugin} */ (/** @type {unknown} */ (angular.templatePlugin));
+const ngrxPlugin = /** @type {Plugin} */ (/** @type {unknown} */ (ngrx));
+
 /**
  * @param {string} prefix Component and directive selector prefix of the project (`shell`, `dsc`…).
  */
@@ -38,7 +44,7 @@ export default function angularConfig(prefix) {
       files: ['**/*.ts'],
       processor: angular.processInlineTemplates,
       plugins: {
-        '@angular-eslint': angular.tsPlugin,
+        '@angular-eslint': angularPlugin,
       },
       rules: {
         '@angular-eslint/component-class-suffix': ['error'],
@@ -108,7 +114,7 @@ export default function angularConfig(prefix) {
     {
       files: ['**/*.html'],
       plugins: {
-        '@angular-eslint/template': angular.templatePlugin,
+        '@angular-eslint/template': angularTemplatePlugin,
       },
       languageOptions: {
         parser: angular.templateParser,
@@ -186,7 +192,7 @@ export default function angularConfig(prefix) {
     {
       files: ['**/*.ts'],
       plugins: {
-        '@ngrx': ngrx,
+        '@ngrx': ngrxPlugin,
       },
       rules: {
         // Off: @ngrx/component-store is not installed.
