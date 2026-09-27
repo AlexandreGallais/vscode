@@ -16,7 +16,10 @@
     "importHelpers": true,
     "target": "ES2025",
     "module": "preserve",
-    "lib": ["DOM", "ESNext"]
+    "lib": ["DOM", "ESNext"],
+
+    "strict": true,
+    "noImplicitThis": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
