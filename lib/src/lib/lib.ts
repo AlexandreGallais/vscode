@@ -6,4 +6,4 @@ import { Component } from '@angular/core';
   styles: ``,
   template: ` <p>lib works!</p> `,
 })
-export class Lib {}
+export class LibComponent {}

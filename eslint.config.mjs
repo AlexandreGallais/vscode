@@ -8,7 +8,17 @@ import globals from 'globals';
 
 export default defineConfig([
   // Build outputs, caches and dependencies (same folders as .gitignore).
-  globalIgnores(['**/node_modules/', 'dist/', 'tmp/', 'out-tsc/', 'bazel-out/', '.angular/', 'coverage/']),
+  globalIgnores([
+    '**/node_modules/',
+    'dist/',
+    'tmp/',
+    'out-tsc/',
+    'bazel-out/',
+    '.angular/',
+    'coverage/',
+    '**/public/',
+    '**/assets/',
+  ]),
   // Formatting is Prettier's job; its recommended config turns off the conflicting rules.
   {
     files: ['**/*.js', '**/*.mjs', '**/*.ts', '**/*.mts', '**/*.html'],
