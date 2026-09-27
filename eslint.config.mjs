@@ -1,4 +1,5 @@
 // Comment prefixes: `Custom` = project choice (non-standard), `Off` = disabled on purpose, `Deprecated` = replaced.
+// Shared by every project (TypeScript, tests, imports, file names); Angular projects add eslint-angular.config.mjs.
 
 import { defineConfig, globalIgnores } from 'eslint/config';
 import tsEslint from 'typescript-eslint';
@@ -8,9 +9,40 @@ import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
 import importX from 'eslint-plugin-import-x';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import checkFile from 'eslint-plugin-check-file';
-import ngrx from '@ngrx/eslint-plugin';
 import vitest from '@vitest/eslint-plugin';
 import globals from 'globals';
+
+// @typescript-eslint/naming-convention selectors, exported so eslint-angular.config.mjs can extend them.
+export const namingConventionSelectors = [
+  // camelCase; `_` prefix = unused param or private member.
+  { selector: 'default', format: ['camelCase'], leadingUnderscore: 'allow' },
+  { selector: 'import', format: ['camelCase', 'PascalCase'] },
+  // PascalCase: branded-type factories; UPPER_CASE: constants.
+  { selector: 'variable', format: ['camelCase', 'PascalCase', 'UPPER_CASE'], leadingUnderscore: 'allow' },
+  // Names come from external APIs.
+  { selector: 'variable', modifiers: ['destructured'], format: null },
+  // PascalCase: branded-type factories (`DataId()`).
+  { selector: 'function', format: ['camelCase', 'PascalCase'] },
+  { selector: 'typeLike', format: ['PascalCase'] },
+  // No `I` prefix (TypeScript convention).
+  { selector: 'interface', format: ['PascalCase'], custom: { regex: '^I[A-Z]', match: false } },
+  { selector: 'enumMember', format: ['PascalCase'] },
+  // Quoted keys: HTTP headers, external APIs.
+  {
+    selector: [
+      'classProperty',
+      'objectLiteralProperty',
+      'typeProperty',
+      'classMethod',
+      'objectLiteralMethod',
+      'typeMethod',
+      'accessor',
+      'enumMember',
+    ],
+    modifiers: ['requiresQuotes'],
+    format: null,
+  },
+];
 
 export default defineConfig([
   // Stale `eslint-disable` and inline configs are errors, so every exception stays justified.
@@ -343,7 +375,7 @@ export default defineConfig([
       'no-throw-literal': ['error'],
       'no-undef-init': ['off'],
       'no-undefined': ['off'],
-      // Off: `_` prefix is allowed (NgRx private members, unused params).
+      // Off: `_` prefix is allowed (private members, unused params).
       'no-underscore-dangle': ['off'],
       'no-unneeded-ternary': ['error'],
       'no-unused-expressions': ['error'],
@@ -403,7 +435,7 @@ export default defineConfig([
   {
     files: ['**/*.ts', '**/*.mts'],
     languageOptions: {
-      // TS files are Angular code running in the browser.
+      // TS files run in the browser.
       globals: {
         ...globals.browser,
         ...globals.es2027,
@@ -455,7 +487,7 @@ export default defineConfig([
       '@typescript-eslint/class-literal-property-style': ['error'],
       // Replaced by the TS version.
       'class-methods-use-this': ['off'],
-      // Custom: Angular hooks and pipes are skipped (class implements OnInit, PipeTransform…).
+      // Custom: methods required by an implemented interface are skipped.
       '@typescript-eslint/class-methods-use-this': [
         'warn',
         { ignoreClassesThatImplementAnInterface: 'public-fields', ignoreOverrideMethods: true },
@@ -484,49 +516,11 @@ export default defineConfig([
       'max-params': ['off'],
       // 7 = SonarQube default (S107).
       '@typescript-eslint/max-params': ['error', { max: 7 }],
-      // Off: Angular fields initialise in order (`inject()` first), conflicting with its default order.
-      '@typescript-eslint/member-ordering': ['off'],
+      '@typescript-eslint/member-ordering': ['error'],
       // Custom: `foo(): void` style; pass members as callbacks through `() => api.foo()`.
       '@typescript-eslint/method-signature-style': ['error', 'method'],
-      // Custom: Angular + NgRx + RxJS naming; the most specific selector wins.
-      '@typescript-eslint/naming-convention': [
-        'error',
-        // camelCase; `_` prefix = unused param or NgRx private member.
-        { selector: 'default', format: ['camelCase'], leadingUnderscore: 'allow' },
-        { selector: 'import', format: ['camelCase', 'PascalCase'] },
-        // PascalCase: NgRx stores, branded-type factories; UPPER_CASE: InjectionToken.
-        { selector: 'variable', format: ['camelCase', 'PascalCase', 'UPPER_CASE'], leadingUnderscore: 'allow' },
-        // Names come from external APIs.
-        { selector: 'variable', modifiers: ['destructured'], format: null },
-        // PascalCase: branded-type factories (`DataId()`).
-        { selector: 'function', format: ['camelCase', 'PascalCase'] },
-        // PascalCase: enum exposed to a template.
-        {
-          selector: 'classProperty',
-          modifiers: ['readonly'],
-          format: ['camelCase', 'PascalCase'],
-          leadingUnderscore: 'allow',
-        },
-        { selector: 'typeLike', format: ['PascalCase'] },
-        // No `I` prefix (Angular / TypeScript convention).
-        { selector: 'interface', format: ['PascalCase'], custom: { regex: '^I[A-Z]', match: false } },
-        { selector: 'enumMember', format: ['PascalCase'] },
-        // Quoted keys: Angular host bindings, HTTP headers.
-        {
-          selector: [
-            'classProperty',
-            'objectLiteralProperty',
-            'typeProperty',
-            'classMethod',
-            'objectLiteralMethod',
-            'typeMethod',
-            'accessor',
-            'enumMember',
-          ],
-          modifiers: ['requiresQuotes'],
-          format: null,
-        },
-      ],
+      // Custom: the most specific selector wins (see namingConventionSelectors).
+      '@typescript-eslint/naming-convention': ['error', ...namingConventionSelectors],
       // Replaced by the TS version.
       'no-array-constructor': ['off'],
       '@typescript-eslint/no-array-constructor': ['error'],
@@ -552,8 +546,7 @@ export default defineConfig([
       '@typescript-eslint/no-explicit-any': ['error'],
       // Off: no-non-null-assertion forbids every `!`.
       '@typescript-eslint/no-extra-non-null-assertion': ['off'],
-      // Angular classes are decorated (`@Component`, `@Injectable`…).
-      '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
+      '@typescript-eslint/no-extraneous-class': ['error'],
       '@typescript-eslint/no-floating-promises': ['error'],
       '@typescript-eslint/no-for-in-array': ['error'],
       '@typescript-eslint/no-generated-empty-object-type': ['error'],
@@ -674,7 +667,7 @@ export default defineConfig([
       'prefer-promise-reject-errors': ['off'],
       '@typescript-eslint/prefer-promise-reject-errors': ['error'],
       '@typescript-eslint/prefer-readonly': ['error'],
-      // Off: would need an allow-list of every Angular / RxJS / DOM type.
+      // Off: would need an allow-list of every library and DOM type.
       '@typescript-eslint/prefer-readonly-parameter-types': ['off'],
       '@typescript-eslint/prefer-reduce-type-parameter': ['error'],
       '@typescript-eslint/prefer-regexp-exec': ['error'],
@@ -750,7 +743,7 @@ export default defineConfig([
       'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
       // Off: TypeScript checks it.
       'import-x/default': ['off'],
-      // Off: webpack only (Angular builds with esbuild).
+      // Off: webpack only (builds use esbuild).
       'import-x/dynamic-import-chunkname': ['off'],
       'import-x/export': ['error'],
       // Off: non-standard.
@@ -774,7 +767,7 @@ export default defineConfig([
       'import-x/no-anonymous-default-export': ['error'],
       'import-x/no-commonjs': ['error'],
       'import-x/no-cycle': ['error'],
-      // Named exports only (Angular convention); tool configs are the exception.
+      // Named exports only; tool configs are the exception.
       'import-x/no-default-export': ['error'],
       // Off: duplicate of @typescript-eslint/no-deprecated.
       'import-x/no-deprecated': ['off'],
@@ -853,11 +846,11 @@ export default defineConfig([
       'import-x/no-default-export': ['off'],
       'import-x/no-extraneous-dependencies': ['error', { packageDir: import.meta.dirname }],
       'import-x/no-nodejs-modules': ['off'],
-      // Off: project configs extend the root config (`../eslint.config.mjs`).
+      // Off: project configs extend the root configs (`../eslint-angular.config.mjs`).
       'import-x/no-relative-packages': ['off'],
     },
   },
-  // File and folder names: kebab-case, the Angular type stays a middle extension (`button.component.ts`).
+  // File and folder names: kebab-case, the type stays a middle extension (`user.service.ts`).
   {
     files: ['**/*.js', '**/*.mjs', '**/*.ts', '**/*.mts', '**/*.html'],
     plugins: {
@@ -878,94 +871,6 @@ export default defineConfig([
       'check-file/no-index': ['error'],
     },
   },
-  // Angular requires this name for the application page.
-  {
-    files: ['**/src/index.html'],
-    rules: {
-      'check-file/no-index': ['off'],
-    },
-  },
-  // NgRx: only @ngrx/signals is installed.
-  {
-    files: ['**/*.ts'],
-    plugins: {
-      '@ngrx': ngrx,
-    },
-    rules: {
-      // Off: @ngrx/component-store is not installed.
-      '@ngrx/avoid-combining-component-store-selectors': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/avoid-combining-selectors': ['off'],
-      // Off: @ngrx/effects is not installed.
-      '@ngrx/avoid-cyclic-effects': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/avoid-dispatching-multiple-actions-sequentially': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/avoid-duplicate-actions-in-reducer': ['off'],
-      // Off: @ngrx/component-store is not installed.
-      '@ngrx/avoid-mapping-component-store-selectors': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/avoid-mapping-selectors': ['off'],
-      '@ngrx/enforce-type-call': ['error'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/good-action-hygiene': ['off'],
-      // Off: @ngrx/effects is not installed.
-      '@ngrx/no-dispatch-in-effects': ['off'],
-      // Off: @ngrx/effects is not installed.
-      '@ngrx/no-effects-in-providers': ['off'],
-      // Off: @ngrx/effects is not installed.
-      '@ngrx/no-multiple-actions-in-effects': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/no-multiple-global-stores': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/no-reducer-in-key-names': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/no-store-subscription': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/no-typed-global-store': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/on-function-explicit-return-type': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/prefer-action-creator': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/prefer-action-creator-in-dispatch': ['off'],
-      // Off: @ngrx/effects is not installed.
-      '@ngrx/prefer-action-creator-in-of-type': ['off'],
-      // Off: @ngrx/operators is not installed.
-      '@ngrx/prefer-concat-latest-from': ['off'],
-      // Off: @ngrx/effects is not installed.
-      '@ngrx/prefer-effect-callback-in-block-statement': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/prefer-inline-action-props': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/prefer-one-generic-in-create-for-feature-selector': ['off'],
-      '@ngrx/prefer-protected-state': ['error'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/prefer-selector-in-select': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/prefix-selectors-with-select': ['off'],
-      // Off: @ngrx/component-store is not installed.
-      '@ngrx/require-super-ondestroy': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/select-style': ['off'],
-      '@ngrx/signal-state-no-arrays-at-root-level': ['error'],
-      '@ngrx/signal-store-feature-should-use-generic-type': ['error'],
-      // Off: @ngrx/component-store is not installed.
-      '@ngrx/updater-explicit-return-type': ['off'],
-      // Off: @ngrx/store is not installed.
-      '@ngrx/use-consistent-global-store-name': ['off'],
-      // Off: @ngrx/effects is not installed.
-      '@ngrx/use-effects-lifecycle-interface': ['off'],
-      '@ngrx/with-state-no-arrays-at-root-level': ['error'],
-    },
-  },
-  // NgRx features: the type returned by `signalStoreFeature()` is too complex to write by hand.
-  {
-    files: ['**/*store*/**/with*.ts'],
-    rules: {
-      '@typescript-eslint/explicit-function-return-type': ['off'],
-    },
-  },
   // Specs: Vitest globals.
   {
     files: ['**/*.spec.ts', '**/*.spec.mts'],
@@ -977,16 +882,11 @@ export default defineConfig([
     plugins: {
       vitest,
     },
-    // Type information lets valid-title accept a class as title (`describe(AppComponent, …)`).
+    // Type information lets valid-title accept a class as title (`describe(UserService, …)`).
     settings: {
       vitest: { typecheck: true },
     },
     rules: {
-      // Off: Angular types `fixture.nativeElement` as `any`.
-      '@typescript-eslint/no-unsafe-assignment': ['off'],
-      '@typescript-eslint/no-unsafe-call': ['off'],
-      '@typescript-eslint/no-unsafe-member-access': ['off'],
-      '@typescript-eslint/no-unsafe-type-assertion': ['off'],
       // Replaced by the Vitest version (allows `expect(obj.method).toHaveBeenCalled()`).
       '@typescript-eslint/unbound-method': ['off'],
       // Off: a `describe` callback holds a whole suite.
@@ -995,9 +895,9 @@ export default defineConfig([
       // ---- Vitest ----
       // Custom: `.for` (typed, Vitest 2+) instead of `.each`.
       'vitest/consistent-each-for': ['error', { test: 'for', it: 'for', describe: 'for', suite: 'for' }],
-      // Custom: Angular specs are named `*.spec.ts`.
+      // Custom: specs are named `*.spec.ts`.
       'vitest/consistent-test-filename': ['error', { pattern: String.raw`.*\.spec\.ts$` }],
-      // Custom: `it` everywhere, as generated by the Angular CLI.
+      // Custom: `it` everywhere.
       'vitest/consistent-test-it': ['error', { fn: 'it', withinDescribe: 'it' }],
       'vitest/consistent-vitest-vi': ['error'],
       'vitest/expect-expect': ['error'],
@@ -1014,7 +914,7 @@ export default defineConfig([
       'vitest/no-done-callback': ['off'],
       'vitest/no-duplicate-hooks': ['error'],
       'vitest/no-focused-tests': ['error'],
-      // Off: Angular specs configure TestBed in `beforeEach`.
+      // Off: test setup belongs in `beforeEach`.
       'vitest/no-hooks': ['off'],
       'vitest/no-identical-title': ['error'],
       'vitest/no-import-node-test': ['error'],
@@ -1068,7 +968,7 @@ export default defineConfig([
       'vitest/prefer-import-in-mock': ['error'],
       // Off: opposite of no-importing-vitest-globals.
       'vitest/prefer-importing-vitest-globals': ['off'],
-      // Custom: `describe` titles are classes (`ButtonComponent`).
+      // Custom: `describe` titles are classes (`UserService`).
       'vitest/prefer-lowercase-title': ['error', { ignore: ['describe'] }],
       'vitest/prefer-mock-promise-shorthand': ['error'],
       'vitest/prefer-mock-return-shorthand': ['error'],
