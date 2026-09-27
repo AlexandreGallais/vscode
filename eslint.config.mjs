@@ -1055,7 +1055,8 @@ export default defineConfig([
       // Off: its autofix turns `toHaveBeenCalled()` into `toHaveBeenCalledWith()`, which asserts no arguments.
       'vitest/prefer-called-with': ['off'],
       'vitest/prefer-comparison-matcher': ['error'],
-      'vitest/prefer-describe-function-title': ['error'],
+      // Off: its autofix rewrites the title on every save and fights valid-title in editors; both forms stay valid.
+      'vitest/prefer-describe-function-title': ['off'],
       'vitest/prefer-each': ['error'],
       'vitest/prefer-equality-matcher': ['error'],
       // Off: requires `expect.assertions()` in every test; async tests use `await` instead.
@@ -1100,7 +1101,7 @@ export default defineConfig([
       'vitest/valid-expect': ['error'],
       'vitest/valid-expect-in-promise': ['error'],
       'vitest/valid-title': ['error'],
-      // `.todo` tests are listed, and block the CI with `--max-warnings 0`.
+      // Custom: warn, unfinished placeholder tests are listed and block the CI with `--max-warnings 0`.
       'vitest/warn-todo': ['warn'],
     },
   },
